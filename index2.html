@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <script src="https://cdn.bootcss.com/vue/2.3.0/vue.min.js"></script>
+  <style>
+    /* 自定义select 下拉框 */
+
+    * {
+      margin: 0;
+      padding: 0
+    }
+
+    body {
+      background-color: rgba(115, 115, 115, .8)
+    }
+
+    .my-select {
+      position: relative;
+      width: 100%;
+      display: inline-block;
+    }
+
+    .select-value {
+      position: relative;
+      width: 100%;
+      height: 31px;
+      line-height: 31px;
+      background-color: #fff;
+      padding-left: 10px;
+      /* white-space 处理空白保证一行显示 */
+      white-space: nowrap;
+      /* 超出部分隐藏 */
+      overflow: hidden;
+      text-overflow: ellipsis;
+      box-sizing: border-box;
+      z-index: 10;
+      border-radius: 14px;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      -webkit-appearance: none;
+      padding-right: 15px;
+      font-size: 14px;
+      color: #000;
+    }
+
+    .select-value img,
+    .colorChange img {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 10px;
+      right: 10px;
+    }
+
+    .select-option ul li.selected {
+      background-color: #59b0c9;
+    }
+
+
+    .select-option {
+      background-color: #eef0f1;
+      color: #000;
+      width: 100%;
+      /* 控制高度 */
+      max-height: 200px;
+      position: absolute;
+      top: 12px;
+      z-index: 1;
+      overflow-y: auto;
+      padding-top: 30px;
+      box-sizing: border-box;
+      border-radius: 12px;
+    }
+
+    .select-option ul li {
+      padding: 0 10px;
+      height: 24px;
+      line-height: 24px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      cursor: pointer;
+    }
+
+    /*,.select-option ul li.selected*/
+
+    .select-option ul li:hover {
+      background-color: #59b0c9;
+    }
+
+    .my-select ::-webkit-scrollbar {
+      /*border-radius:0 10px 0px;*/
+      border-bottom-right-radius: 10px;
+      width: 10px;
+      background-color: #ccc;
+    }
+
+    /*定义滚动条轨道 内阴影+圆角*/
+
+    .my-select ::-webkit-scrollbar-track {
+      -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+      border-radius: 10px;
+      background-color: #f9f9f9;
+    }
+
+    /*定义滑块 内阴影+圆角*/
+
+    .my-select ::-webkit-scrollbar-thumb {
+      border-radius: 10px;
+      -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, .3);
+      background-color: #bfbfbf;
+    }
+
+    .hid {
+      display: none;
+    }
+
+    .provice-select,
+    .city-provice {
+      width: 300px
+    }
+    /* 控制显示的层次 */
+    .provice-select .select-value{
+      z-index: 12;
+    }
+    .provice-select .select-option{
+      z-index: 11;
+    }
+
+    /* 文字保证一行显示，会出滚动条 */
+
+    .text p:nth-of-type(1) {
+      white-space: nowrap;
+    }
+
+    /* 块元素 */
+
+    .text .test {
+      white-space: nowrap;
+      width: 12em;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      border: 1px solid #000000;
+    }
+
+    .text .world {
+      width: 150px;
+      height: 70px;
+      background: red;
+      /* 英文强制 强制换行 会拆分单词 */
+      word-break: break-all
+    }
+    .text .world1 {
+      width: 150px;
+      height: 70px;
+      background: red;
+      /* 英文强制 强制换行 不会拆分单词 */
+      word-wrap: break-word
+    }
+  </style>
+</head>
+
+<body>
+  <div id="vSelect">
+
+    <div class="provice-select">
+      <div class="my-select">
+        <p class='select-value' @click="showProvinceOptions">
+          <span v-show="!selectedProvince.hasOwnProperty('nameCn')">请选择</span>
+          <span v-show="selectedProvince.hasOwnProperty('nameCn')">{{selectedProvince.nameCn}}</span>
+          <img src="https://cdn.boldseas.com/image/porsche-shop/test/mobile/common/down.png" />
+        </p>
+        <div v-bind:class="isShowProvinceOptions?'select-option':'select-option hid'">
+          <ul @click="closeProvinceOptions">
+            <li @click="selectProvince(-1)">请选择</li>
+            <li v-for="province in provinces" v-bind:value="province" v-bind:class="selectedProvince===province?'selected':''" @click="selectProvince(province)">
+              {{province.nameCn}}
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="city-provice">
+      <div class="my-select">
+        <p class='select-value' @click="showCityOptions">
+          <span v-show="!selectedCity.hasOwnProperty('nameCn')">请选择</span>
+          <span v-show="selectedCity.hasOwnProperty('nameCn')">{{selectedCity.nameCn}}</span>
+          <img src="https://cdn.boldseas.com/image/porsche-shop/test/mobile/common/down.png" />
+        </p>
+        <div v-cloak v-bind:class="isShowCityOptions?'select-option':'select-option hid'">
+          <ul @click="closeCityOptions">
+            <li @click="selectCity(-1)">请选择</li>
+            <li v-for="city in cities" v-bind:value="city" v-bind:class="selectedCity===city?'selected':''" @click="selectCity(city)">
+              {{city.nameCn}}
+            </li>
+          </ul>
+
+        </div>
+      </div>
+    </div>
+
+    <div class="text">
+      <p>
+        这是一些文本。 这是一些文本。 这是一些文本。 这是一些文本。 这是一些文本。 这是一些文本。 这是一些文本。 这是一些文本。 这是一些文本。 这是一些文本。 这是一些文本。 这是一些文本。
+      </p>
+      <div class="test">This is some long text that will not fit in the box</div>
+
+      <div class="world">
+        I am a good boy, hahahahhahahahahahaha everyone very likes me
+      </div>
+      <br/>
+      <br/>
+      <div class="world1">
+        I am a good boy, hahahahhahahahahahaha everyone very likes me
+      </div>
+    </div>
+
+  </div>
+
+
+
+</body>
+<script src="./select.js"></script>
+<script>
+  var proviceData = [{ "id": 10, "parentId": 7, "nameCn": "北京", "nameEn": "BeiJing", "directGovernedCity": false, "postalCode": "100000", "code": "010", "level": 1, "sort": 0, "valid": true, "description": "省/直辖市" }, { "id": 11, "parentId": 1, "nameCn": "上海", "nameEn": "ShangHai", "directGovernedCity": false, "postalCode": "200000", "code": "020", "level": 1, "sort": 0, "valid": true, "description": "省/直辖市" }, { "id": 12, "parentId": 7, "nameCn": "天津", "nameEn": "TianJin", "directGovernedCity": false, "postalCode": "300000", "code": "030", "level": 1, "sort": 0, "valid": true, "description": "省/直辖市" }, { "id": 13, "parentId": 5, "nameCn": "重庆", "nameEn": "ChongQing", "directGovernedCity": false, "postalCode": "404100", "code": "320", "level": 1, "sort": 0, "valid": true, "description": "省/直辖市" }, { "id": 14, "parentId": 8, "nameCn": "河北", "nameEn": "HeBei", "directGovernedCity": false, "postalCode": "300000", "code": "060", "level": 1, "sort": 0, "valid": true, "description": "省/直辖市" }, { "id": 15, "parentId": 9, "nameCn": "山西", "nameEn": "ShanXi", "directGovernedCity": false, "postalCode": "030000", "code": "250", "level": 1, "sort": 0, "valid": true, "description": "省/直辖市" }, { "id": 16, "parentId": 9, "nameCn": "内蒙古", "nameEn": "Inner Mongolia", "directGovernedCity": false, "postalCode": "010000", "code": "040", "level": 1, "sort": 0, "valid": true, "description": "省/直辖市" }, { "id": 17, "parentId": 7, "nameCn": "辽宁", "nameEn": "LiaoNing", "directGovernedCity": false, "postalCode": "110000", "code": "070", "level": 1, "sort": 0, "valid": true, "description": "省/直辖市" }, { "id": 18, "parentId": 7, "nameCn": "吉林", "nameEn": "JiLin", "directGovernedCity": false, "postalCode": "132000", "code": "080", "level": 1, "sort": 0, "valid": true, "description": "省/直辖市" }, { "id": 19, "parentId": 7, "nameCn": "黑龙江", "nameEn": "HeiLongJiang", "directGovernedCity": false, "postalCode": "150000", "code": "090", "level": 1, "sort": 0, "valid": true, "description": "省/直辖市" }, { "id": 20, "parentId": 2, "nameCn": "江苏", "nameEn": "JiangSu", "directGovernedCity": false, "postalCode": "210000", "code": "100", "level": 1, "sort": 0, "valid": true, "description": "省/直辖市" }, { "id": 21, "parentId": 3, "nameCn": "浙江", "nameEn": "ZheJiang", "directGovernedCity": false, "postalCode": "310000", "code": "130", "level": 1, "sort": 0, "valid": true, "description": "省/直辖市" }, { "id": 22, "parentId": 2, "nameCn": "安徽", "nameEn": "AnHui", "directGovernedCity": false, "postalCode": "230000", "code": "110", "level": 1, "sort": 0, "valid": true, "description": "省/直辖市" }, { "id": 23, "parentId": 6, "nameCn": "福建", "nameEn": "FuJian", "directGovernedCity": false, "postalCode": "350000", "code": "150", "level": 1, "sort": 0, "valid": true, "description": "省/直辖市" }, { "id": 24, "parentId": 1, "nameCn": "江西", "nameEn": "JiangXi", "directGovernedCity": false, "postalCode": "330000", "code": "140", "level": 1, "sort": 0, "valid": true, "description": "省/直辖市" }, { "id": 25, "parentId": 8, "nameCn": "山东", "nameEn": "ShanDong", "directGovernedCity": false, "postalCode": "250000", "code": "120", "level": 1, "sort": 0, "valid": true, "description": "省/直辖市" }, { "id": 26, "parentId": 8, "nameCn": "河南", "nameEn": "HeNan", "directGovernedCity": false, "postalCode": "450000", "code": "180", "level": 1, "sort": 0, "valid": true, "description": "省/直辖市" }, { "id": 27, "parentId": 1, "nameCn": "湖北", "nameEn": "HuBei", "directGovernedCity": false, "postalCode": "430000", "code": "170", "level": 1, "sort": 0, "valid": true, "description": "省/直辖市" }, { "id": 28, "parentId": 1, "nameCn": "湖南", "nameEn": "HuNan", "directGovernedCity": false, "postalCode": "410000", "code": "160", "level": 1, "sort": 0, "valid": true, "description": "省/直辖市" }, { "id": 29, "parentId": 4, "nameCn": "广东", "nameEn": "GuangDong", "directGovernedCity": false, "postalCode": "510000", "code": "190", "level": 1, "sort": 0, "valid": true, "description": "省/直辖市" }, { "id": 30, "parentId": 5, "nameCn": "广西", "nameEn": "GuangXi", "directGovernedCity": false, "postalCode": "530000", "code": "210", "level": 1, "sort": 0, "valid": true, "description": "省/直辖市" }, { "id": 31, "parentId": 6, "nameCn": "海南", "nameEn": "HaiNan", "directGovernedCity": false, "postalCode": "570000", "code": "200", "level": 1, "sort": 0, "valid": true, "description": "省/直辖市" }, { "id": 32, "parentId": 5, "nameCn": "四川", "nameEn": "SiChuan", "directGovernedCity": false, "postalCode": "610000", "code": "230", "level": 1, "sort": 0, "valid": true, "description": "省/直辖市" }, { "id": 33, "parentId": 5, "nameCn": "贵州", "nameEn": "GuiZhou", "directGovernedCity": false, "postalCode": "550000", "code": "220", "level": 1, "sort": 0, "valid": true, "description": "省/直辖市" }, { "id": 34, "parentId": 5, "nameCn": "云南", "nameEn": "YunNan", "directGovernedCity": false, "postalCode": "650000", "code": "240", "level": 1, "sort": 0, "valid": true, "description": "省/直辖市" }, { "id": 36, "parentId": 9, "nameCn": "陕西", "nameEn": "ShaanXi", "directGovernedCity": false, "postalCode": "710000", "code": "050", "level": 1, "sort": 0, "valid": true, "description": "省/直辖市" }, { "id": 37, "parentId": 9, "nameCn": "甘肃", "nameEn": "GanSu", "directGovernedCity": false, "postalCode": "730000", "code": "260", "level": 1, "sort": 0, "valid": true, "description": "省/直辖市" }, { "id": 38, "parentId": 9, "nameCn": "宁夏", "nameEn": "NingXia", "directGovernedCity": false, "postalCode": "750000", "code": "270", "level": 1, "sort": 0, "valid": true, "description": "省/直辖市" }, { "id": 40, "parentId": 9, "nameCn": "新疆", "nameEn": "XinJiang", "directGovernedCity": false, "postalCode": "830000", "code": "290", "level": 1, "sort": 0, "valid": true, "description": "省/直辖市" }];
+  var cityData = [{ "id": 11, "parentId": 1, "nameCn": "上海", "nameEn": "ShangHai", "directGovernedCity": false, "postalCode": "200000", "code": "020", "level": 1, "sort": 0, "valid": true, "description": "省/直辖市" }];
+  var vSelect = new Vue({
+    el: '#vSelect',
+    data: {
+      isShowProvinceOptions: false,
+      isShowCityOptions: false,
+      provinces: proviceData,
+      cities: cityData,
+      selectedCity: -1,
+      selectedProvince: {},
+    },
+    methods: {
+      showProvinceOptions: function () {
+        this.isShowProvinceOptions = !this.isShowProvinceOptions;
+        this.isShowCityOptions = false;//关掉其它select
+      },
+      closeProvinceOptions: function () {
+        this.isShowProvinceOptions = false;
+      },
+
+      showCityOptions: function () {
+        this.isShowCityOptions = !this.isShowCityOptions;
+        this.isShowProvinceOptions = false;//关掉其它select
+
+      },
+      closeCityOptions: function () {
+        this.isShowCityOptions = false;
+      },
+      selectProvince: function (province) {
+        this.selectedProvince = province;
+      },
+      selectCity: function (city) {
+        this.selectedCity = city;
+      },
+    }
+  });
+  // 捕捉 document 点击事件
+  document.addEventListener('click', function (e) {
+    if (e.target.className.indexOf('select-value') < 0) {
+      vSelect.isShowProvinceOptions = false;
+      vSelect.isShowCityOptions = false;
+    }
+  });
+</script>
+
+</html>
